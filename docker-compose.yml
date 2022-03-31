@@ -1,0 +1,19 @@
+
+version: "2.2"
+networks:
+    local_net_frontend:
+        driver: bridge
+services:
+    http-dev:
+        image: httpd
+        container_name: http-dev
+        #restart: unless-stopped
+        networks:
+            - local_net_frontend
+        ports:
+            - "80:80"
+        volumes:
+            - type: bind
+              source: "$PWD"
+              target: /usr/local/apache2/htdocs
+#        entrypoint: ["ls", "-al", "/usr/local/apache2/htdocs"]
