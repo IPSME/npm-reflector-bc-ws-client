@@ -15,6 +15,10 @@ if ('serviceWorker' in navigator)
         // manually update service worker
         // registration.update();
 
+        registration.installing; // the installing worker, or undefined
+        registration.waiting; // the waiting worker, or undefined
+        registration.active; // the active worker, or undefined
+
         registration.addEventListener('updatefound', function() {
             // If updatefound is fired, it means that there's
             // a new service worker being installed.
@@ -23,22 +27,30 @@ if ('serviceWorker' in navigator)
 
             // You can listen for changes to the installing service worker's
             // state via installingWorker.onstatechange
+
+            // https://web.dev/service-worker-lifecycle/
+            registration.installing.state;
+            // "installing" - the install event has fired, but not yet complete
+            // "installed"  - install complete
+            // "activating" - the activate event has fired, but not yet complete
+            // "activated"  - fully active
+            // "redundant"  - discarded. Either failed install, or it's been
+            //                replaced by a newer version        
+
+            registration.installing.addEventListener('statechange', () => {
+                // newWorker.state has changed
+            });
         });
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers
-        //
-
-        registration.addEventListener('oninstall', function() {
-            console.log('oninstall');
-        });
-
-        registration.addEventListener('onactivate', function() {
-            // The primary use of onactivate is for cleanup of resources used in previous versions of a Service worker script.
-            console.log('onactivate');
-        });
     })
     .catch(function(error) {
         console.log('Service worker registration failed:', error);
+    });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // This fires when the service worker controlling this page
+      // changes, eg a new worker has skipped waiting and become
+      // the new active worker.
     });
 } 
 else {
