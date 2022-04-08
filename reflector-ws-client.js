@@ -33,23 +33,21 @@ self.addEventListener('fetch', event => {
 	const url = new URL(event.request.url); 
 });
 
+//-------------------------------------------------------------------------------------------------
 
 const ws = new WebSocket("ws://localhost:8082"); // wss://
 const bc = new BroadcastChannel('');
 
 ws.onopen = function(event) {
     console.log('REFL-ws: open: ['+ event +']');
-    ws.send("Here's some text that the server is urgently awaiting!");
 }
 
 ws.onclose = function(event) {
     console.log('REFL-ws: close: ['+ event +']');
 }
 
-
 ws.onmessage = function(event) {
-    console.log('REFL-ws: msg: ['+ event.data +'] -> BroadcastChannel');
-
+    console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ event.data +']');
 	bc.postMessage(event.data);
 }
 
@@ -57,4 +55,11 @@ ws.onerror = function(event) {
     console.log('REFL-ws: err: ['+ event +']');
 }
 
+bc.onmessage = event => {
+    console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ event.data +']');
 
+	// https://stackoverflow.com/questions/23051416/uncaught-invalidstateerror-failed-to-execute-send-on-websocket-still-in-co
+
+	if (ws.readyState === WebSocket.OPEN)
+		ws.send(event.data);
+}

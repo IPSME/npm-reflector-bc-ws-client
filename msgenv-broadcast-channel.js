@@ -1,3 +1,29 @@
+
+const msgenv_BroadcastChannel = new BroadcastChannel('');
+
+var global_subscription_handler= null;
+
+function IPSME_MsgEnv_subscribe(handler) {
+    window.global_subscription_handler= handler;
+}
+
+function IPSME_MsgEnv_unsubscribe(handler) {
+    window.global_subscription_handler= null;
+}
+
+msgenv_BroadcastChannel.onmessage = event => {
+	// console.log('CLIENT: BroadcastChannel msg ['+ event.data +']'); 
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
+    if (global_subscription_handler !== null)
+        window.global_subscription_handler(event.data);
+}
+
+function IPSME_MsgEnv_publish(str_msg) {
+    msgenv_BroadcastChannel.postMessage(str_msg);
+}
+
+//-------------------------------------------------------------------------------------------------
+
 // https://web.dev/service-worker-lifecycle/
 // You can detect if a client is controlled via navigator.serviceWorker.controller which will be null or a service worker instance
 
