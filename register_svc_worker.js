@@ -10,7 +10,7 @@
 
 if ('serviceWorker' in navigator) 
 {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) 
+    navigator.serviceWorker.register('reflector-ws-client.js').then(function(registration) 
     {
         // manually update service worker
         // registration.update();
@@ -23,7 +23,7 @@ if ('serviceWorker' in navigator)
             // If updatefound is fired, it means that there's
             // a new service worker being installed.
             var installingWorker = registration.installing;
-            console.log('A new service worker is being installed:', installingWorker);
+            console.log('REG: A new service worker is being installed:', installingWorker);
 
             // You can listen for changes to the installing service worker's
             // state via installingWorker.onstatechange
@@ -44,7 +44,7 @@ if ('serviceWorker' in navigator)
 
     })
     .catch(function(error) {
-        console.log('Service worker registration failed:', error);
+        console.log('REG: Service worker registration failed:', error);
     });
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
@@ -54,5 +54,5 @@ if ('serviceWorker' in navigator)
     });
 } 
 else {
-    console.log('Service workers are not supported.');
+    console.log('REG: Service workers are not supported.');
 }

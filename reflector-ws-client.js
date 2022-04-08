@@ -2,7 +2,7 @@
 
 self.addEventListener('install', event => 
 {
-	console.log('V1 installing…');
+	console.log('REFL-ws: vX installing…');
 
 	// The waiting phase means you're only running one version of your site at once, but if you don't need that feature ...
 	// self.skipWaiting()
@@ -22,7 +22,7 @@ self.addEventListener('activate', event =>
 	// 	console.log('V2 now ready to handle fetches!');
 	// });
 
-	console.log('V1 now ready to handle fetches!');
+	console.log('REFL-ws: vX now ready to handle fetches!');
 
 	// Once your service worker is ready to control clients and handle functional events like push and sync
 
@@ -38,23 +38,23 @@ const ws = new WebSocket("ws://localhost:8082"); // wss://
 const bc = new BroadcastChannel('');
 
 ws.onopen = function(event) {
-    console.log('open: ['+ event +']');
+    console.log('REFL-ws: open: ['+ event +']');
     ws.send("Here's some text that the server is urgently awaiting!");
 }
 
 ws.onclose = function(event) {
-    console.log('close: ['+ event +']');
+    console.log('REFL-ws: close: ['+ event +']');
 }
 
 
 ws.onmessage = function(event) {
-    console.log('msg: ['+ event.data +'] -> blank BC');
+    console.log('REFL-ws: msg: ['+ event.data +'] -> BroadcastChannel');
 
 	bc.postMessage(event.data);
 }
 
 ws.onerror = function(event) {
-    console.log('err: ['+ event +']');
+    console.log('REFL-ws: err: ['+ event +']');
 }
 
 
