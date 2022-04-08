@@ -12,7 +12,7 @@ function IPSME_MsgEnv_unsubscribe(handler) {
 }
 
 msgenv_BroadcastChannel.onmessage = event => {
-	// console.log('CLIENT: BroadcastChannel msg ['+ event.data +']'); 
+	// console.log('msgenv_BroadcastChannel.onmessage: ['+ event.data +']'); 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
     if (global_subscription_handler !== null)
         window.global_subscription_handler(event.data);
