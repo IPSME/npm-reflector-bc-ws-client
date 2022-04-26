@@ -1,8 +1,10 @@
 // https://web.dev/service-worker-lifecycle/
 
+const k_VERSION= 1;
+
 self.addEventListener('install', event => 
 {
-	console.log('REFL-ws: vX installing…');
+	console.log('REFL-ws: v'+ k_VERSION +' installing…');
 
 	// The waiting phase means you're only running one version of your site at once, but if you don't need that feature ...
 	// self.skipWaiting()
@@ -22,7 +24,7 @@ self.addEventListener('activate', event =>
 	// 	console.log('V2 now ready to handle fetches!');
 	// });
 
-	console.log('REFL-ws: vX now ready to handle fetches!');
+	console.log('REFL-ws: v'+ k_VERSION +' now ready to handle fetches!');
 
 	// Once your service worker is ready to control clients and handle functional events like push and sync
 
