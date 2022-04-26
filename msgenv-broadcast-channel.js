@@ -38,7 +38,7 @@ msgenv_BroadcastChannel.onmessage = event => {
 
 	// console.log('msgenv_BroadcastChannel.onmessage: ['+ event.data +']'); 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
-    if (global_subscription_handler !== null)
+    if (window.global_subscription_handler !== null)
         window.global_subscription_handler(msg);
 }
 
