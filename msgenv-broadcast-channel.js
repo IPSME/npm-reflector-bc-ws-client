@@ -25,7 +25,7 @@ let checkConnection = () => {
             if (global_ServiceWorker.state === "activated") {
                 resolve();
                 return;
-        }
+            }
         }
 
         connection_resolvers.push({resolve, reject});
@@ -90,12 +90,12 @@ if ('serviceWorker' in navigator)
         if (registration.installing) {
             global_ServiceWorker= registration.installing;
         }
-        // else if (registration.waiting) {
-        //     console.log('REG: '+ global_ServiceWorker.state);
-        // }
-        // else if (registration.active) {
-        //     console.log('REG: '+ global_ServiceWorker.state);
-        // }
+        else if (registration.waiting) {
+            global_ServiceWorker= registration.waiting;
+        }
+        else if (registration.active) {
+            global_ServiceWorker= registration.active;
+        }
 
         if (global_ServiceWorker) 
         {
