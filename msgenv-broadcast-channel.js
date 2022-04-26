@@ -22,12 +22,13 @@ let connection_resolvers= [];
 let checkConnection = () => {
     return new Promise((resolve, reject) => {
         if (global_ServiceWorker) {
-            if (global_ServiceWorker === "activated")
+            if (global_ServiceWorker.state === "activated") {
                 resolve();
+                return;
         }
-        else {
-            connection_resolvers.push({resolve, reject});
         }
+
+        connection_resolvers.push({resolve, reject});
     });
 }
 
