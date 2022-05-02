@@ -15,7 +15,7 @@ function uuidv4() {
 // console.log(uuidv4());
 
 //-------------------------------------------------------------------------------------------------
-// MsgEnv
+// MsgEnv:
 
 console.log('MsgEnv: new BroadcastChannel()');
 const msgenv_BroadcastChannel = new BroadcastChannel('');
@@ -66,7 +66,7 @@ function IPSME_MsgEnv_publish(str_msg) {
 }
 
 //-------------------------------------------------------------------------------------------------
-// js-reflector-ws-client (ServiceWorker)
+// REG: js-reflector-ws-client (ServiceWorker)
 
 // https://web.dev/service-worker-lifecycle/
 // You can detect if a client is controlled via navigator.serviceWorker.controller which will be null or a service worker instance
@@ -94,6 +94,9 @@ if ('serviceWorker' in navigator)
             global_ServiceWorker= registration.waiting;
         }
         else if (registration.active) {
+            // if we are here, the onstatechange handler below never fires.
+            //
+            connection_resolvers.forEach(r => r.resolve());
             global_ServiceWorker= registration.active;
         }
 
