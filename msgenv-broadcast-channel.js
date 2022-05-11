@@ -45,7 +45,7 @@ let checkConnection = () => {
 }
 
 msgenv_BroadcastChannel.onmessage = event => {
-    msg= event.data;
+    let msg= event.data;
     console.log('MsgEnv: onmessage: ['+ msg +']');
 
 	// console.log('msgenv_BroadcastChannel.onmessage: ['+ event.data +']'); 
@@ -111,15 +111,14 @@ if ('serviceWorker' in navigator)
             // "redundant"  - discarded. Either failed install, or it's been
             //                replaced by a newer version        
 
-            global_ServiceWorker.onstatechange= onstatechange= function(event) {
+            global_ServiceWorker.onstatechange= function(event) {
                 if (global_ServiceWorker.state === "activated") {
                     connection_resolvers.forEach(r => r.resolve());
                 }
-            }
+            };
         }
 
-        registration.onupdatefound= function(event) 
-        {
+        registration.onupdatefound= function(event) {
             // If updatefound is fired, it means that there's
             // a new service worker being installed.
             console.log('REG: A new service worker is being installed:', registration.installing);
@@ -130,11 +129,11 @@ if ('serviceWorker' in navigator)
         console.log('REG: Service worker registration failed:', error);
     });
 
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    navigator.serviceWorker.oncontrollerchange= function(event) {
       // This fires when the service worker controlling this page
       // changes, eg a new worker has skipped waiting and become
       // the new active worker.
-    });
+    };
 } 
 else {
     console.log('REG: Service workers are not supported.');
