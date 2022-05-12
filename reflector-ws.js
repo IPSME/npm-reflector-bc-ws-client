@@ -32,7 +32,7 @@ if ('serviceWorker' in navigator)
         else if (registration.active) {
             // if we are here, the onstatechange handler below never fires.
             //
-            connection_resolvers.forEach(r => r.resolve());
+//           connection_resolvers.forEach(r => r.resolve());
             global_ServiceWorker= registration.active;
         }
 
@@ -48,9 +48,9 @@ if ('serviceWorker' in navigator)
             //                replaced by a newer version        
 
             global_ServiceWorker.onstatechange= function(event) {
-                if (global_ServiceWorker.state === "activated") {
-                    connection_resolvers.forEach(r => r.resolve());
-                }
+                // if (global_ServiceWorker.state === "activated") {
+                //     connection_resolvers.forEach(r => r.resolve());
+                // }
             };
         }
 

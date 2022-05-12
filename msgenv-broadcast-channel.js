@@ -1,6 +1,4 @@
 
-// var global_subscription_handler= null;
-
 //-------------------------------------------------------------------------------------------------
 
 // https://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid
@@ -16,50 +14,33 @@ function uuidv4() {
 //-------------------------------------------------------------------------------------------------
 // MsgEnv:
 
-console.log('MsgEnv: new BroadcastChannel()');
-const msgenv_BroadcastChannel = new BroadcastChannel('');
-
-function IPSME_MsgEnv_subscribe(handler) {
-    window.global_subscription_handler= handler;
-}
-
-function IPSME_MsgEnv_unsubscribe(handler) {
-    window.global_subscription_handler= null;
-}
-
-// https://stackoverflow.com/questions/23051416/uncaught-invalidstateerror-failed-to-execute-send-on-websocket-still-in-co
+// https://stackoverflow.com/questions/34351804/how-to-declare-a-global-variable-in-react
 //
-let connection_resolvers= [];
-let checkConnection = () => {
-    return new Promise((resolve, reject) => {
-        if (global_ServiceWorker) {
-            if (global_ServiceWorker.state === "activated") {
-                resolve();
-                return;
-            }
-        }
+const msgenv= {};
+msgenv;
 
-        connection_resolvers.push({resolve, reject});
-    });
+msgenv.broadcastChannel = new BroadcastChannel('');
+msgenv.subscription_handler= null;
+
+function subscribe(handler) {
+    msgenv.subscription_handler= handler;
 }
 
-msgenv_BroadcastChannel.onmessage = event => {
-    let msg= event.data;
-    console.log('MsgEnv: onmessage: ['+ msg +']');
+function unsubscribe(handler) {
+    msgenv.subscription_handler= null;
+}
 
+msgenv.broadcastChannel.onmessage = event => {
 	// console.log('msgenv_BroadcastChannel.onmessage: ['+ event.data +']'); 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
-    if (window.global_subscription_handler !== null)
-        window.global_subscription_handler(msg);
+    if (msgenv.subscription_handler !== null)
+        msgenv.subscription_handler(event.data);
 }
 
-async function async_publish(str_msg) {
-    await checkConnection();
-
-    console.log('MsgEnv: async_publish ['+ str_msg +']');
-    msgenv_BroadcastChannel.postMessage(str_msg);
+function publish(str_msg) {
+    msgenv.broadcastChannel.postMessage(str_msg);
 }
 
-function IPSME_MsgEnv_publish(str_msg) {
-	async_publish(str_msg);
-}
+//-------------------------------------------------------------------------------------------------
+
+export { msgenv as default, subscribe, unsubscribe, publish }
