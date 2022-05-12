@@ -17,7 +17,6 @@ function uuidv4() {
 // https://stackoverflow.com/questions/34351804/how-to-declare-a-global-variable-in-react
 //
 const msgenv= {};
-msgenv;
 
 msgenv.broadcastChannel = new BroadcastChannel('');
 msgenv.subscription_handler= null;

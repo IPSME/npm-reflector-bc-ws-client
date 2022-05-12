@@ -14,65 +14,69 @@ var global_ServiceWorker= null;
 // Because of this overlap, the current service worker is always controlling a client during a refresh.
 // To get the update, close or navigate away from all tabs using the current service worker. 
 
-if ('serviceWorker' in navigator) 
+function register()
 {
-    navigator.serviceWorker.register('reflector-ws-client.js').then(function(registration) 
+    if ('serviceWorker' in navigator) 
     {
-        // manually update service worker
-        //registration.update();
-
-        // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker
-
-        if (registration.installing) {
-            global_ServiceWorker= registration.installing;
-        }
-        else if (registration.waiting) {
-            global_ServiceWorker= registration.waiting;
-        }
-        else if (registration.active) {
-            // if we are here, the onstatechange handler below never fires.
-            //
-//           connection_resolvers.forEach(r => r.resolve());
-            global_ServiceWorker= registration.active;
-        }
-
-        if (global_ServiceWorker) 
+        navigator.serviceWorker.register('reflector-ws-client.js').then(function(registration) 
         {
-            // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker/state
-            // ServiceWorker.state;
-            // "installing" - the install event has fired, but not yet complete
-            // "installed"  - install complete
-            // "activating" - the activate event has fired, but not yet complete
-            // "activated"  - fully active
-            // "redundant"  - discarded. Either failed install, or it's been
-            //                replaced by a newer version        
+            // manually update service worker
+            //registration.update();
 
-            global_ServiceWorker.onstatechange= function(event) {
-                // if (global_ServiceWorker.state === "activated") {
-                //     connection_resolvers.forEach(r => r.resolve());
-                // }
+            // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker
+
+            if (registration.installing) {
+                global_ServiceWorker= registration.installing;
+            }
+            else if (registration.waiting) {
+                global_ServiceWorker= registration.waiting;
+            }
+            else if (registration.active) {
+                // if we are here, the onstatechange handler below never fires.
+                //
+    //           connection_resolvers.forEach(r => r.resolve());
+                global_ServiceWorker= registration.active;
+            }
+
+            if (global_ServiceWorker) 
+            {
+                // https://developer.mozilla.org/en-US/docs/Web/API/ServiceWorker/state
+                // ServiceWorker.state;
+                // "installing" - the install event has fired, but not yet complete
+                // "installed"  - install complete
+                // "activating" - the activate event has fired, but not yet complete
+                // "activated"  - fully active
+                // "redundant"  - discarded. Either failed install, or it's been
+                //                replaced by a newer version        
+
+                global_ServiceWorker.onstatechange= function(event) {
+                    // if (global_ServiceWorker.state === "activated") {
+                    //     connection_resolvers.forEach(r => r.resolve());
+                    // }
+                };
+            }
+
+            registration.onupdatefound= function(event) {
+                // If updatefound is fired, it means that there's
+                // a new service worker being installed.
+                console.log('REG: A new service worker is being installed:', registration.installing);
             };
-        }
 
-        registration.onupdatefound= function(event) {
-            // If updatefound is fired, it means that there's
-            // a new service worker being installed.
-            console.log('REG: A new service worker is being installed:', registration.installing);
+        })
+        .catch(function(error) {
+            console.log('REG: Service worker registration failed:', error);
+        });
+
+        navigator.serviceWorker.oncontrollerchange= function(event) {
+        // This fires when the service worker controlling this page
+        // changes, eg a new worker has skipped waiting and become
+        // the new active worker.
         };
-
-    })
-    .catch(function(error) {
-        console.log('REG: Service worker registration failed:', error);
-    });
-
-    navigator.serviceWorker.oncontrollerchange= function(event) {
-      // This fires when the service worker controlling this page
-      // changes, eg a new worker has skipped waiting and become
-      // the new active worker.
-    };
-} 
-else {
-    console.log('REG: Service workers are not supported.');
+    } 
+    
+    else console.log('REG: Service workers are not supported.');
 }
 
 //-------------------------------------------------------------------------------------------------
+
+export { register };
