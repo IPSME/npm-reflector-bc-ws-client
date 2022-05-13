@@ -42,4 +42,4 @@ function publish(str_msg) {
 
 //-------------------------------------------------------------------------------------------------
 
-export { msgenv as default, subscribe, unsubscribe, publish }
+export { uuidv4, msgenv as default, subscribe, unsubscribe, publish }

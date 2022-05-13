@@ -2,6 +2,70 @@
 
 const k_VERSION= 1;
 
+//-------------------------------------------------------------------------------------------------
+
+let bc= null;
+let ws= null;
+
+let websocket_onopen= function(event) {
+	console.log('REFL-ws: open: ['+ event +']');
+
+	connection_resolvers.forEach(r => r.resolve());
+}
+
+let websocket_onclose= function(event) {
+    console.log('REFL-ws: close: ['+ event +']');
+	ws= null;
+}
+
+let websocket_onmessage = function(event) {
+	let str_msg= event.data;
+    console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ str_msg +']');
+	if (bc)
+		bc.postMessage(str_msg);
+}
+
+let websocket_onerror= function(event) {
+	console.log('REFL-ws: err: ['+ event +']');
+	ws= null;
+}		
+
+// https://stackoverflow.com/questions/23051416/uncaught-invalidstateerror-failed-to-execute-send-on-websocket-still-in-co
+//
+let connection_resolvers= [];
+let checkConnection = () => {
+
+	if (ws === null)
+	{
+		ws= new WebSocket("ws://localhost:8082"); // wss://
+
+		ws.onopen= websocket_onopen;
+		ws.onclose= websocket_onclose;
+		ws.onmessage= websocket_onmessage;
+		ws.onerror= websocket_onerror;
+	}
+
+    return new Promise((resolve, reject) => {
+		if (ws && (ws.readyState === WebSocket.OPEN) )
+		{
+			resolve();
+			return;
+		}
+
+		connection_resolvers.push({resolve, reject});
+    });
+}
+
+async function async_send(str_msg) {
+    await checkConnection();
+
+	console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
+    ws.send(str_msg);
+}
+
+//-------------------------------------------------------------------------------------------------
+// https://web.dev/service-worker-lifecycle/
+
 self.addEventListener('install', event => 
 {
 	console.log('REFL-ws: v'+ k_VERSION +' installing…');
@@ -12,7 +76,18 @@ self.addEventListener('install', event =>
 
 	// https://web.dev/service-worker-lifecycle/
 	// the promise you pass to event.waitUntil() lets the browser know when your install completes, and if it was successful
-	// event.waitUntil(...);
+
+	event.waitUntil( new Promise((resolve, reject) => {
+
+		bc= new BroadcastChannel('');
+		bc.onmessage = event => {
+			let str_msg= event.data;
+			async_send(str_msg);
+		}
+	
+		resolve();
+	}) );
+
 });
 
 self.addEventListener('activate', event => 
@@ -36,32 +111,3 @@ self.addEventListener('fetch', event => {
 });
 
 //-------------------------------------------------------------------------------------------------
-
-const ws = new WebSocket("ws://localhost:8082"); // wss://
-const bc = new BroadcastChannel('');
-
-ws.onopen = function(event) {
-    console.log('REFL-ws: open: ['+ event +']');
-}
-
-ws.onclose = function(event) {
-    console.log('REFL-ws: close: ['+ event +']');
-}
-
-ws.onmessage = function(event) {
-    console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ event.data +']');
-	bc.postMessage(event.data);
-}
-
-ws.onerror = function(event) {
-    console.log('REFL-ws: err: ['+ event +']');
-}
-
-bc.onmessage = event => {
-    console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ event.data +']');
-
-	// https://stackoverflow.com/questions/23051416/uncaught-invalidstateerror-failed-to-execute-send-on-websocket-still-in-co
-
-	if (ws.readyState === WebSocket.OPEN)
-		ws.send(event.data);
-}
