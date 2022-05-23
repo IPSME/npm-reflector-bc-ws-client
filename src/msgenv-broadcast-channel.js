@@ -22,6 +22,8 @@ msgenv.broadcastChannel = new BroadcastChannel('');
 msgenv.subscription_handler= null;
 
 function subscribe(handler) {
+    console.log('MsgEnv: subscribe');
+
     msgenv.subscription_handler= handler;
 }
 
