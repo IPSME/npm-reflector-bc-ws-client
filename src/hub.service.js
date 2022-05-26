@@ -1,66 +1,28 @@
+// https://www.npmjs.com/package/reconnecting-websocket
+// https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
+import ReconnectingWebSocket from './reconnecting-websocket-mjs.js';
 
 const k_VERSION= 2;
 
 //-------------------------------------------------------------------------------------------------
 
 let bc= null;
-let ws= null;
-
-let websocket_onopen= function(event) {
-	console.log('REFL-ws: open: ['+ event +']');
-
-	connection_resolvers.forEach(r => r.resolve());
-}
+let rws= null;
 
 let websocket_onclose= function(event) {
   console.log('REFL-ws: close: ['+ event +']');
-	ws= null;
 }
 
 let websocket_onmessage = function(event) {
 	let str_msg= event.data;
-    console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ str_msg +']');
+  // console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ str_msg +']');
 	if (bc)
 		bc.postMessage(str_msg);
 }
 
 let websocket_onerror= function(event) {
 	console.log('REFL-ws: err: ['+ event +']');
-	ws= null;
 }		
-
-// https://stackoverflow.com/questions/23051416/uncaught-invalidstateerror-failed-to-execute-send-on-websocket-still-in-co
-//
-let connection_resolvers= [];
-let checkConnection = () => {
-
-	if (ws === null)
-	{
-		ws= new WebSocket("ws://localhost:8082"); // wss://
-
-		ws.onopen= websocket_onopen;
-		ws.onclose= websocket_onclose;
-		ws.onmessage= websocket_onmessage;
-		ws.onerror= websocket_onerror;
-	}
-
-    return new Promise((resolve, reject) => {
-		if (ws && (ws.readyState === WebSocket.OPEN) )
-		{
-			resolve();
-			return;
-		}
-
-		connection_resolvers.push({resolve, reject});
-    });
-}
-
-async function async_send(str_msg) {
-    await checkConnection();
-
-	  // console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
-    ws.send(str_msg);
-}
 
 //-------------------------------------------------------------------------------------------------
 // https://web.dev/service-worker-lifecycle/
@@ -71,13 +33,27 @@ self.addEventListener("install", function(e)
 
 	e.waitUntil( new Promise((resolve, reject) => {
 
+    console.log('REFL-ws: opening BC');
+
 		bc= new BroadcastChannel('');
-		bc.onmessage = event => {
+		bc.onmessage = function(event) {
 			let str_msg= event.data;
-			async_send(str_msg);
+      // console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
+      if (rws && (rws.readyState === WebSocket.OPEN) )
+			  rws.send(str_msg);
 		}
-	
-		resolve();
+
+    // console.log('REFL-ws: opening RWS');
+
+		rws= new ReconnectingWebSocket("ws://localhost:8082"); // wss://
+		rws.onopen= function(event) {
+      // console.log('REFL-ws: open: ['+ event +']');
+      resolve();
+    }
+    
+		rws.onclose= websocket_onclose;
+		rws.onmessage= websocket_onmessage;
+		rws.onerror= websocket_onerror;	
     
 	}).then(self.skipWaiting()) );
 
