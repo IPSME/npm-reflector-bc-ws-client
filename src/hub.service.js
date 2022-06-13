@@ -12,6 +12,8 @@ let bc= new BroadcastChannel('');
 let rws= new ReconnectingWebSocket("ws://localhost:8082"); // wss://
 
 bc.onmessage = function(event) {
+  if (typeof(event.data) !== 'string')
+    return;
   let str_msg= event.data;
   // console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
   if (rws && (rws.readyState === WebSocket.OPEN) )
