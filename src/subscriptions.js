@@ -26,6 +26,18 @@ export default class Subscriptions {
       try {
         navigator.serviceWorker
           .register("/hub.service.js", {type: "module"})
+          .then(function(registration) {
+            if (registration.installing) {
+              console.log("Service worker: installing");
+            }
+            else if (registration.waiting) {
+              console.log("Service worker: waiting");
+            }
+            else if (registration.active) {
+              // if we are here, the onstatechange handler never fires.
+              console.log("Service worker: active");
+            }
+          })
           .then(() => {
             navigator.serviceWorker.ready
               .then(registration => this.setRegistration(registration))
@@ -45,7 +57,7 @@ export default class Subscriptions {
   };
 
   setRegistration = registration => {
-    console.log("Service worker registered");
+    console.log("Service worker: registered");
     this.registration = registration;
   };
 

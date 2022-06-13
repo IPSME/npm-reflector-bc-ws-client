@@ -2,61 +2,46 @@
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
 import ReconnectingWebSocket from './reconnecting-websocket-mjs.js';
 
-const k_VERSION= 2;
+const k_VERSION= 1;
 
 //-------------------------------------------------------------------------------------------------
 
-let bc= null;
-let rws= null;
+console.log('REFL-ws: opening rws & bc');
 
-let websocket_onclose= function(event) {
-  console.log('REFL-ws: close: ['+ event +']');
+let bc= new BroadcastChannel('');
+let rws= new ReconnectingWebSocket("ws://localhost:8082"); // wss://
+
+bc.onmessage = function(event) {
+  let str_msg= event.data;
+  // console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
+  if (rws && (rws.readyState === WebSocket.OPEN) )
+    rws.send(str_msg);
 }
 
-let websocket_onmessage = function(event) {
+rws.onopen= function(event) {
+  console.log('REFL-ws: open: ', event);
+}
+
+rws.onmessage= function(event) {
 	let str_msg= event.data;
   // console.log('REFL-ws: msg: BroadcastChannel <- ws -- ['+ str_msg +']');
 	if (bc)
 		bc.postMessage(str_msg);
 }
 
-let websocket_onerror= function(event) {
+rws.onclose=  function(event) {
+  console.log('REFL-ws: close: ['+ event +']');
+}
+
+rws.onerror= function(event) {
 	console.log('REFL-ws: err: ['+ event +']');
 }		
 
 //-------------------------------------------------------------------------------------------------
-// https://web.dev/service-worker-lifecycle/
 
-self.addEventListener("install", function(e) 
-{
+self.addEventListener("install", function(e) {
 	console.log('REFL-ws: v'+ k_VERSION +' installing…');
-
-	e.waitUntil( new Promise((resolve, reject) => {
-
-    console.log('REFL-ws: opening BC');
-
-		bc= new BroadcastChannel('');
-		bc.onmessage = function(event) {
-			let str_msg= event.data;
-      // console.log('REFL-ws: msg: BroadcastChannel -> ws -- ['+ str_msg +']');
-      if (rws && (rws.readyState === WebSocket.OPEN) )
-			  rws.send(str_msg);
-		}
-
-    // console.log('REFL-ws: opening RWS');
-
-		rws= new ReconnectingWebSocket("ws://localhost:8082"); // wss://
-		rws.onopen= function(event) {
-      // console.log('REFL-ws: open: ['+ event +']');
-      resolve();
-    }
-    
-		rws.onclose= websocket_onclose;
-		rws.onmessage= websocket_onmessage;
-		rws.onerror= websocket_onerror;	
-    
-	}).then(self.skipWaiting()) );
-
+  return e.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", function(e) {
