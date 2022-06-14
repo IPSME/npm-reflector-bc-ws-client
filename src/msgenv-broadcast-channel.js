@@ -14,34 +14,27 @@ function uuidv4() {
 //-------------------------------------------------------------------------------------------------
 // MsgEnv:
 
-// https://stackoverflow.com/questions/34351804/how-to-declare-a-global-variable-in-react
-//
-const msgenv= {};
-
-msgenv.broadcastChannel = new BroadcastChannel('');
-msgenv.subscription_handler= null;
+let bc= new BroadcastChannel('');
 
 function subscribe(handler) {
+    if (handler.broadcastChannel !== undefined)
+        return;
     console.log('MsgEnv: subscribe');
-
-    msgenv.subscription_handler= handler;
+    handler.broadcastChannel= new BroadcastChannel('');
+    handler.broadcastChannel.onmessage= function(event) {
+        // console.log('msgenv_BroadcastChannel.onmessage: ', event.data);
+        this(event.data);
+    }.bind(handler);
 }
 
 function unsubscribe(handler) {
-    msgenv.subscription_handler= null;
+    delete handler.broadcastChannel;
 }
 
-msgenv.broadcastChannel.onmessage = event => {
-	// console.log('msgenv_BroadcastChannel.onmessage: ['+ event.data +']'); 
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null
-    if (msgenv.subscription_handler !== null)
-        msgenv.subscription_handler(event.data);
-}
-
-function publish(str_msg) {
-    msgenv.broadcastChannel.postMessage(str_msg);
+function publish(msg) {
+    bc.postMessage(msg);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-export { uuidv4, msgenv as default, subscribe, unsubscribe, publish }
+export { uuidv4, subscribe, unsubscribe, publish }

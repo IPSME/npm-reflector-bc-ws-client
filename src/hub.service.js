@@ -8,6 +8,10 @@ const k_VERSION= 1;
 
 console.log('REFL-ws: opening rws & bc');
 
+const rws_options= {
+  maxRetries: 20,
+}
+
 let bc= new BroadcastChannel('');
 let rws= new ReconnectingWebSocket("ws://localhost:8082"); // wss://
 
