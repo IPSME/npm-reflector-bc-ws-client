@@ -40,20 +40,26 @@ function is_JSON(obj) {
 
 //-------------------------------------------------------------------------------------------------
 
+//TODO: the reflector should be using the IPSME lib too
 const bc = new BroadcastChannel('');
 
-bc.onmessage = event => {
+bc.onmessage = event => 
+{
+	if (event.data === undefined)
+		return;
 
 	// IPSME doesn't dictate that strings should be passed. The javascript broadcast ME allows
-	// for objects to be passed, so we are just going to pass the event.data. 
+	// for objects to be passed, but the web socket doesn't support them, so drop non-strings.
 
-	// if (typeof(event.data) === 'string') 
+	if (typeof(event.data) !== 'string') 
+		return;
 
-	console.log('REFL-ws: msg: bc -> ws -- ', event.data);
+	let str_msg= event.data;
+	console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
 
 	// msg_cache.cache(str_msg, { ms_TTL_: 30000 })
 	if (ws && (ws.readyState === WebSocket.OPEN))
-		ws.send(event.data);
+		ws.send(str_msg);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -68,7 +74,11 @@ ws.onclose = function (event) {
 	console.log('REFL-ws: close: ', event);
 }
 
-ws.onmessage = function (event) {
+ws.onmessage = function (event) 
+{
+	if (event.data === undefined)
+		return;
+
 	console.assert(typeof(event.data) === 'string', 'a msg coming from NSDNC must be a string');
 	const str_msg = event.data;
 
