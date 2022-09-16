@@ -1,0 +1,25 @@
+{
+  "name": "@ipsme/reflector-ws-client",
+  "version": "0.0.32",
+  "description": "",
+  "main": "sharedworker-reflector.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/IPSME/npm-reflector-ws-client.git"
+  },
+  "keywords": [
+    "reflector",
+    "ipsme",
+    "metaverse",
+    "interoperability"
+  ],
+  "author": "K.Nevelsteen, PhD",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IPSME/npm-reflector-ws-client/issues"
+  },
+  "homepage": "https://github.com/IPSME/npm-reflector-ws-client#readme"
+}
