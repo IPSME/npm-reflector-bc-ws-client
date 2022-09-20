@@ -1,7 +1,7 @@
 // https://stackoverflow.com/questions/44118600/web-workers-how-to-import-modules
 
 let ws = new WebSocket("ws://localhost:8082"); // wss://
-console.log('ws:');
+// console.log('ws:');
 
 var port;
 var connections= [];
@@ -9,7 +9,7 @@ var connections= [];
 onconnect = function (e) {
 	port = e.ports[0];
 
-	console.log('REFL: onconnect: ', e);
+	// console.log('REFL: onconnect: ', e);
 
 	// https://www.codemag.com/Article/2101071/Understanding-and-Using-Web-Workers
     const existingConnection= connections.find(connection => {
@@ -55,7 +55,7 @@ bc.onmessage = event =>
 		return;
 
 	let str_msg= event.data;
-	console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
+	// console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
 
 	// msg_cache.cache(str_msg, { ms_TTL_: 30000 })
 	if (ws && (ws.readyState === WebSocket.OPEN))
@@ -65,13 +65,13 @@ bc.onmessage = event =>
 //-------------------------------------------------------------------------------------------------
 
 ws.onopen = function (event) {
-	console.log('REFL-ws: open: ', event);
+	// console.log('REFL-ws: open: ', event);
 
 	port.postMessage({ ws : 'INITd!' });
 }
 
 ws.onclose = function (event) {
-	console.log('REFL-ws: close: ', event);
+	// console.log('REFL-ws: close: ', event);
 }
 
 ws.onmessage = function (event) 
@@ -82,11 +82,11 @@ ws.onmessage = function (event)
 	console.assert(typeof(event.data) === 'string', 'a msg coming from NSDNC must be a string');
 	const str_msg = event.data;
 
-	console.log('REFL-ws: msg: bc <- ws -- ', str_msg);
+	// console.log('REFL-ws: msg: bc <- ws -- ', str_msg);
 	if (bc)
 		bc.postMessage(str_msg);
 }
 
 ws.onerror = function (event) {
-	console.log('REFL-ws: err: ', event);
+	// console.log('REFL-ws: err: ', event);
 }
