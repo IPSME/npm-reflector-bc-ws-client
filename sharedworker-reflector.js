@@ -1,10 +1,10 @@
 
 
-function load(window, callback_INITd)
+function load(window, str_worker_path, callback_INITd)
 {
 	if (!!window.SharedWorker) 
 	{
-		const sharedworker= new SharedWorker("./reflector-bc-ws-client.js");
+		const sharedworker= new SharedWorker( str_worker_path ); // "./reflector-bc-ws-client.js"
 		sharedworker.port.start();
 
 		console.log("new SharedWorker", sharedworker);

@@ -1,6 +1,10 @@
 {
   "name": "@ipsme/reflector-ws-client",
+<<<<<<< HEAD
   "version": "0.0.32",
+=======
+  "version": "0.0.40",
+>>>>>>> 7269d85 (URL as function arg.)
   "description": "",
   "main": "sharedworker-reflector.js",
   "scripts": {
