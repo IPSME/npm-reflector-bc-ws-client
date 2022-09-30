@@ -55,6 +55,7 @@ function is_JSON(obj) {
 }
 
 //-------------------------------------------------------------------------------------------------
+// bc -> ws
 
 function handler_(msg)
 {
@@ -68,9 +69,10 @@ function handler_(msg)
 		return;
 
 	let str_msg= msg;
-	// console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
 
-	// msg_cache.cache(str_msg, { ms_TTL_: 30000 })
+	msg_cache_.cache(str_msg, new EntryContext(knr_MSG_EXPIRATION_ms));
+
+	// console.log('REFL-ws: send: bc -> ws -- ', str_msg);
 	if (rws && (rws.readyState === WebSocket.OPEN))
 		rws.send(str_msg);
 }
@@ -78,6 +80,7 @@ function handler_(msg)
 IPSME_MsgEnv.subscribe(handler_);
 
 //-------------------------------------------------------------------------------------------------
+// bc <- ws
 
 rws.onopen = function (event) {
 	// console.log('REFL-ws: open: ', event);
@@ -97,7 +100,13 @@ rws.onmessage = function (event)
 	console.assert(typeof(event.data) === 'string', 'a msg coming from NSDNC must be a string');
 	const str_msg = event.data;
 
-	// console.log('REFL-ws: msg: bc <- ws -- ', str_msg);
+	let [ b_res, ctx ]= msg_cache_.contains(str_msg)
+	if (b_res) {
+		// console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
+		return;
+	}
+
+	// console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
 	IPSME_MsgEnv.publish(str_msg);
 }
 
