@@ -4,6 +4,7 @@
   "description": "",
   "main": "sharedworker-reflector.js",
   "scripts": {
+    "build": "webpack",
     "test": "test.js"
   },
   "repository": {
@@ -21,5 +22,13 @@
   "bugs": {
     "url": "https://github.com/IPSME/npm-reflector-ws-client/issues"
   },
-  "homepage": "https://github.com/IPSME/npm-reflector-ws-client#readme"
+  "homepage": "https://github.com/IPSME/npm-reflector-ws-client#readme",
+  "dependencies": {
+    "@ipsme/msgcache-dedup": "^0.0.5",
+    "reconnecting-websocket": "^4.4.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
+  }
 }

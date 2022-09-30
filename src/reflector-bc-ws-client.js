@@ -1,4 +1,17 @@
-// https://stackoverflow.com/questions/44118600/web-workers-how-to-import-modules
+import ReconnectingWebSocket from 'reconnecting-websocket';
+import { MsgCache, EntryContext } from '@ipsme/msgcache-dedup';
+
+let msg_cache_= new MsgCache();
+const knr_MSG_EXPIRATION_ms= 4000;
+
+const rws_options= {
+  maxRetries: 20,
+}
+
+// https://www.npmjs.com/package/reconnecting-websocket
+// https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
+let rws = new ReconnectingWebSocket("ws://localhost:0000"); // wss://
+console.log('REFL: rws:', rws);
 
 let ws = new WebSocket("ws://localhost:8082"); // wss://
 // console.log('ws:');
