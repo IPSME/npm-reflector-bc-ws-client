@@ -10,11 +10,8 @@ const rws_options= {
 
 // https://www.npmjs.com/package/reconnecting-websocket
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
-let rws = new ReconnectingWebSocket("ws://localhost:0000"); // wss://
+let rws = new ReconnectingWebSocket("ws://localhost:8082"); // wss://
 console.log('REFL: rws:', rws);
-
-let ws = new WebSocket("ws://localhost:8082"); // wss://
-// console.log('ws:');
 
 var port;
 var connections= [];
@@ -71,23 +68,23 @@ bc.onmessage = event =>
 	// console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
 
 	// msg_cache.cache(str_msg, { ms_TTL_: 30000 })
-	if (ws && (ws.readyState === WebSocket.OPEN))
-		ws.send(str_msg);
+	if (rws && (rws.readyState === WebSocket.OPEN))
+		rws.send(str_msg);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-ws.onopen = function (event) {
+rws.onopen = function (event) {
 	// console.log('REFL-ws: open: ', event);
 
-	port.postMessage({ ws : 'INITd!' });
+	port.postMessage({ rws : 'INITd!' });
 }
 
-ws.onclose = function (event) {
+rws.onclose = function (event) {
 	// console.log('REFL-ws: close: ', event);
 }
 
-ws.onmessage = function (event) 
+rws.onmessage = function (event) 
 {
 	if (event.data === undefined)
 		return;
@@ -100,6 +97,6 @@ ws.onmessage = function (event)
 		bc.postMessage(str_msg);
 }
 
-ws.onerror = function (event) {
+rws.onerror = function (event) {
 	// console.log('REFL-ws: err: ', event);
 }
