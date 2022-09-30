@@ -1,8 +1,12 @@
-import ReconnectingWebSocket from 'reconnecting-websocket';
+
+import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel';
 import { MsgCache, EntryContext } from '@ipsme/msgcache-dedup';
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
+
+//-------------------------------------------------------------------------------------------------
 
 const rws_options= {
   maxRetries: 20,
@@ -12,6 +16,8 @@ const rws_options= {
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
 let rws = new ReconnectingWebSocket("ws://localhost:8082"); // wss://
 console.log('REFL: rws:', rws);
+
+//-------------------------------------------------------------------------------------------------
 
 var port;
 var connections= [];
@@ -50,27 +56,26 @@ function is_JSON(obj) {
 
 //-------------------------------------------------------------------------------------------------
 
-//TODO: the reflector should be using the IPSME lib too
-const bc = new BroadcastChannel('');
-
-bc.onmessage = event => 
+function handler_(msg)
 {
-	if (event.data === undefined)
+	if (msg === undefined)
 		return;
 
 	// IPSME doesn't dictate that strings should be passed. The javascript broadcast ME allows
 	// for objects to be passed, but the web socket doesn't support them, so drop non-strings.
 
-	if (typeof(event.data) !== 'string') 
+	if (typeof(msg) !== 'string') 
 		return;
 
-	let str_msg= event.data;
+	let str_msg= msg;
 	// console.log('REFL-ws: msg: bc -> ws -- ', str_msg);
 
 	// msg_cache.cache(str_msg, { ms_TTL_: 30000 })
 	if (rws && (rws.readyState === WebSocket.OPEN))
 		rws.send(str_msg);
 }
+
+IPSME_MsgEnv.subscribe(handler_);
 
 //-------------------------------------------------------------------------------------------------
 
@@ -93,8 +98,7 @@ rws.onmessage = function (event)
 	const str_msg = event.data;
 
 	// console.log('REFL-ws: msg: bc <- ws -- ', str_msg);
-	if (bc)
-		bc.postMessage(str_msg);
+	IPSME_MsgEnv.publish(str_msg);
 }
 
 rws.onerror = function (event) {
