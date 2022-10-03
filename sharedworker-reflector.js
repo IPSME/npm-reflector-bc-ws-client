@@ -13,8 +13,8 @@ function load(window, str_worker_path, callback_INITd)
 
 		sharedworker.port.onmessage = function (e) {
 			// console.log(e.lastEventId);
-			let json_ws_Open= e.data;
-			if (json_ws_Open.ws === 'INITd!')
+			let json= e.data;
+			if (json.sharedworker === 'INITd!')
 				callback_INITd();
 		};
 	}

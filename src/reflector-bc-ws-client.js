@@ -84,8 +84,7 @@ IPSME_MsgEnv.subscribe(handler_);
 
 rws.onopen = function (event) {
 	// console.log('REFL-ws: open: ', event);
-
-	port.postMessage({ rws : 'INITd!' });
+	port.postMessage({ sharedworker : 'INITd!' });
 }
 
 rws.onclose = function (event) {
