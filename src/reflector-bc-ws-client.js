@@ -27,6 +27,9 @@ onconnect = function (e) {
 
 	// console.log('REFL: onconnect: ', e);
 
+	if (rws && (rws.readyState === WebSocket.OPEN))
+		port.postMessage({ sharedworker : 'INITd!' });
+
 	// https://www.codemag.com/Article/2101071/Understanding-and-Using-Web-Workers
     const existingConnection= connections.find(connection => {
         return connection === port;

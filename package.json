@@ -1,6 +1,6 @@
 {
   "name": "@ipsme/reflector-ws-client",
-  "version": "0.0.44",
+  "version": "0.0.45",
   "description": "",
   "main": "sharedworker-reflector.js",
   "scripts": {
