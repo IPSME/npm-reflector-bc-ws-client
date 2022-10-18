@@ -6,16 +6,24 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
 
-//-------------------------------------------------------------------------------------------------
+const CXN= 0b0001;	// operations
+const NOT= 0b0010;	// UNUSED
+const RDR= 0b0100;	// redirect
+const DUP= 0b1000;	// duplicates
 
-const rws_options= {
-  maxRetries: 20,
-}
+// const rws_options = {
+// 	maxRetries: 20,
+// 	debug: true
+// }
+
+let b_= 0;
+let ws_url_= "ws://localhost:8082";
+let ws_options_= {}
 
 // https://www.npmjs.com/package/reconnecting-websocket
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
-let rws = new ReconnectingWebSocket("ws://localhost:8082"); // wss://
-console.log('REFL: rws:', rws);
+let rws = new ReconnectingWebSocket(ws_url_, [], ws_options_); // wss://
+// console.log('REFL: rws:', rws);
 
 //-------------------------------------------------------------------------------------------------
 
@@ -38,10 +46,24 @@ onconnect = function (e) {
         connections.push(port);	
 	// ----
 
-	port.onmessage = function (e) {
-		// console.log(e.data);
-		// var workerResult = "Result: ";
+	port.onmessage= function (e) {
+		const options= e.data;
+		
 		// port.postMessage(workerResult);
+
+		if (options.log !== undefined)
+			b_= options.log;
+
+		if (b_&CXN) console.log('REFL: port.onmessage: ', options);
+
+		if (options.url !== undefined)
+			ws_url_= options.url;
+
+		if (options.rws !== undefined)
+			ws_options_= options.rws;
+			
+		rws.close();
+		rws = new ReconnectingWebSocket(ws_url_, [], ws_options_); // wss://
 	};
 };
 
@@ -75,7 +97,7 @@ function handler_(msg)
 
 	msg_cache_.cache(str_msg, new EntryContext(knr_MSG_EXPIRATION_ms));
 
-	// console.log('REFL-ws: send: bc -> ws -- ', str_msg);
+	if (b_&RDR) console.log('REFL-ws: send: bc -> ws -- ', str_msg);
 	if (rws && (rws.readyState === WebSocket.OPEN))
 		rws.send(str_msg);
 }
@@ -86,12 +108,12 @@ IPSME_MsgEnv.subscribe(handler_);
 // bc <- ws
 
 rws.onopen = function (event) {
-	// console.log('REFL-ws: open: ', event);
+	if (b_&CXN) console.log('REFL-ws: open: ', event);
 	port.postMessage({ sharedworker : 'INITd!' });
 }
 
 rws.onclose = function (event) {
-	// console.log('REFL-ws: close: ', event);
+	if (b_&CXN) console.log('REFL-ws: close: ', event);
 }
 
 rws.onmessage = function (event) 
@@ -104,14 +126,14 @@ rws.onmessage = function (event)
 
 	let [ b_res, ctx ]= msg_cache_.contains(str_msg)
 	if (b_res) {
-		// console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
+		if (b_&DUP) console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
 		return;
 	}
 
-	// console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
+	if (b_&RDR) console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
 	IPSME_MsgEnv.publish(str_msg);
 }
 
 rws.onerror = function (event) {
-	// console.log('REFL-ws: err: ', event);
+	if (b_&CXN) console.log('REFL-ws: err: ', event);
 }
