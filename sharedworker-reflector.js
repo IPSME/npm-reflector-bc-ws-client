@@ -4,7 +4,7 @@ function load(window, str_worker_path, options, callback_INITd)
 {
 	if (!!window.SharedWorker) 
 	{
-		const OPR= 0b0001;	// operations
+		const CXN= 0b1 << 0;	// connections
 		
 		let b_= 0;
 		if (options.log !== undefined)
@@ -18,12 +18,12 @@ function load(window, str_worker_path, options, callback_INITd)
 			// console.log(e.lastEventId);
 			let json= e.data;
 			if (json.sharedworker === 'INITd!') {
-				if (b_&OPR) console.log('REFL: sharedworker.load: INITd!');
+				if (b_&CXN) console.log('REFL: sharedworker.load: INITd!');
 				callback_INITd();
 			}
 		};
 
-		if (b_&OPR) console.log("new SharedWorker", sharedworker);
+		if (b_&CXN) console.log("new SharedWorker", sharedworker);
 	}
 }
 
