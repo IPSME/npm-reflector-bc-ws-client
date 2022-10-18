@@ -6,10 +6,11 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
 
-const CXN= 0b0001;	// operations
-const NOT= 0b0010;	// UNUSED
-const RDR= 0b0100;	// redirect
-const DUP= 0b1000;	// duplicates
+const CXN= 0b1 << 0;	// connections
+const NOT= 0b1 << 1;	// UNUSED
+const RDR= 0b1 << 2;	// redirect
+const DUP= 0b1 << 3;	// duplicates
+const MSG= 0b1 << 4;	// MsgEnv
 
 // const rws_options = {
 // 	maxRetries: 20,
@@ -47,20 +48,23 @@ onconnect = function (e) {
 	// ----
 
 	port.onmessage= function (e) {
-		const options= e.data;
+		const opts= e.data;
 		
 		// port.postMessage(workerResult);
 
-		if (options.log !== undefined)
-			b_= options.log;
+		if (opts.log !== undefined) {
+			b_= opts.log;
+		}
 
-		if (b_&CXN) console.log('REFL: port.onmessage: ', options);
+		if (b_&MSG) IPSME_MsgEnv.config.log= (b_&CXN) | ((b_&RDR) >> 1);
 
-		if (options.url !== undefined)
-			ws_url_= options.url;
+		if (b_&CXN) console.log('REFL: port.onmessage: ', opts);
 
-		if (options.rws !== undefined)
-			ws_options_= options.rws;
+		if (opts.url !== undefined)
+			ws_url_= opts.url;
+
+		if (opts.rws !== undefined)
+			ws_options_= opts.rws;
 			
 		rws.close();
 		rws = new ReconnectingWebSocket(ws_url_, [], ws_options_); // wss://
@@ -102,7 +106,7 @@ function handler_(msg)
 		rws.send(str_msg);
 }
 
-IPSME_MsgEnv.subscribe(handler_);
+IPSME_MsgEnv.subscribe(handler_, 'REFL-ws: ');
 
 //-------------------------------------------------------------------------------------------------
 // bc <- ws
