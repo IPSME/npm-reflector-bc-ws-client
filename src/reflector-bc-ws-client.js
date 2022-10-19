@@ -3,27 +3,50 @@ import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel';
 import { MsgCache, EntryContext } from '@ipsme/msgcache-dedup';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
+//-------------------------------------------------------------------------------------------------
+
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
 
 const CXN= 0b1 << 0;	// connections
-const NOT= 0b1 << 1;	// UNUSED
-const RDR= 0b1 << 2;	// redirect
-const DUP= 0b1 << 3;	// duplicates
-const MSG= 0b1 << 4;	// MsgEnv
+const RDR= 0b1 << 1;	// redirect
+const DUP= 0b1 << 2;	// duplicates
+const MSG= 0b1 << 3;	// MsgEnv
 
-// const rws_options = {
-// 	maxRetries: 20,
-// 	debug: true
+const str_default_ws_url_= 'ws://localhost:8082';
+
+// const reflector_options= {
+// 	url : "ws://localhost:8082",
+// 	rws : {
+// 		maxRetries: 20,
+// 		debug: true
+// 	},
+// 	log : cfg_.logr
 // }
 
-let b_= 0;
-let ws_url_= "ws://localhost:8082";
-let ws_options_= {}
+var cfg_= (function() {
+    let _options= {};
+
+    return {
+		get url() {
+			return (_options.url === undefined) ? str_default_ws_url_ : _options.url;
+		},
+		get rws() {
+			return (_options.rws === undefined) ? {} : _options.rws;
+		},
+		get logr() {
+			return (_options.logr === undefined) ? 0 : _options.logr;
+		},
+		get options() { return _options; },
+		set options(obj) {
+			_options= obj;
+		}
+    }
+})();
 
 // https://www.npmjs.com/package/reconnecting-websocket
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
-let rws = new ReconnectingWebSocket(ws_url_, [], ws_options_); // wss://
+let rws = new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
 // console.log('REFL: rws:', rws);
 
 //-------------------------------------------------------------------------------------------------
@@ -48,26 +71,17 @@ onconnect = function (e) {
 	// ----
 
 	port.onmessage= function (e) {
-		const opts= e.data;
-		
 		// port.postMessage(workerResult);
 
-		if (opts.log !== undefined) {
-			b_= opts.log;
-		}
+		cfg_.options= e.data;
 
-		if (b_&MSG) IPSME_MsgEnv.config.log= (b_&CXN) | ((b_&RDR) >> 1);
-
-		if (b_&CXN) console.log('REFL: port.onmessage: ', opts);
-
-		if (opts.url !== undefined)
-			ws_url_= opts.url;
-
-		if (opts.rws !== undefined)
-			ws_options_= opts.rws;
+		if (cfg_.logr&CXN) console.log('REFL: port.onmessage: options: ', cfg_.options);
 			
+		if (cfg_.logr&MSG) 
+			IPSME_MsgEnv.config.logr= (cfg_.logr&CXN) | ((cfg_.logr&RDR) >> 1);
+
 		rws.close();
-		rws = new ReconnectingWebSocket(ws_url_, [], ws_options_); // wss://
+		rws = new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
 	};
 };
 
@@ -101,7 +115,7 @@ function handler_(msg)
 
 	msg_cache_.cache(str_msg, new EntryContext(knr_MSG_EXPIRATION_ms));
 
-	if (b_&RDR) console.log('REFL-ws: send: bc -> ws -- ', str_msg);
+	if (cfg_.logr&RDR) console.log('REFL-ws: send: bc -> ws -- ', str_msg);
 	if (rws && (rws.readyState === WebSocket.OPEN))
 		rws.send(str_msg);
 }
@@ -112,12 +126,12 @@ IPSME_MsgEnv.subscribe(handler_, 'REFL-ws: ');
 // bc <- ws
 
 rws.onopen = function (event) {
-	if (b_&CXN) console.log('REFL-ws: open: ', event);
+	if (cfg_.logr&CXN) console.log('REFL-ws: open: ', event);
 	port.postMessage({ sharedworker : 'INITd!' });
 }
 
 rws.onclose = function (event) {
-	if (b_&CXN) console.log('REFL-ws: close: ', event);
+	if (cfg_.logr&CXN) console.log('REFL-ws: close: ', event);
 }
 
 rws.onmessage = function (event) 
@@ -130,14 +144,14 @@ rws.onmessage = function (event)
 
 	let [ b_res, ctx ]= msg_cache_.contains(str_msg)
 	if (b_res) {
-		if (b_&DUP) console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
+		if (cfg_.logr&DUP) console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
 		return;
 	}
 
-	if (b_&RDR) console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
+	if (cfg_.logr&RDR) console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
 	IPSME_MsgEnv.publish(str_msg);
 }
 
 rws.onerror = function (event) {
-	if (b_&CXN) console.log('REFL-ws: err: ', event);
+	if (cfg_.logr&CXN) console.log('REFL-ws: err: ', event);
 }

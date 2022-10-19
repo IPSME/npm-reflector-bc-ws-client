@@ -1,6 +1,6 @@
 {
   "name": "@ipsme/reflector-ws-client",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "",
   "main": "sharedworker-reflector.js",
   "scripts": {
@@ -25,7 +25,7 @@
   "homepage": "https://github.com/IPSME/npm-reflector-ws-client#readme",
   "dependencies": {
     "@ipsme/msgcache-dedup": "^0.0.6",
-    "@ipsme/msgenv-broadcastchannel": "^0.2.2",
+    "@ipsme/msgenv-broadcastchannel": "^0.2.6",
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
