@@ -77,8 +77,10 @@ onconnect = function (e) {
 
 		if (cfg_.logr&CXN) console.log('REFL: port.onmessage: options: ', cfg_.options);
 			
-		if (cfg_.logr&MSG) 
-			IPSME_MsgEnv.config.logr= (cfg_.logr&CXN) | ((cfg_.logr&RDR) >> 1);
+		IPSME_MsgEnv.config= {
+			prefix : 'REFL-ws: ',
+			logr : (cfg_.logr&MSG) ? (cfg_.logr&CXN) | (cfg_.logr&RDR) : 0,
+		}
 
 		rws.close();
 		rws = new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
@@ -120,7 +122,8 @@ function handler_(msg)
 		rws.send(str_msg);
 }
 
-IPSME_MsgEnv.subscribe(handler_, 'REFL-ws: ');
+// TODO: the config options are set are global are init'd, so this never outputs debug info
+IPSME_MsgEnv.subscribe(handler_);
 
 //-------------------------------------------------------------------------------------------------
 // bc <- ws
