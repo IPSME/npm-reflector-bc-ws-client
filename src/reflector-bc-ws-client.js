@@ -5,6 +5,10 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 
 //-------------------------------------------------------------------------------------------------
 
+// https://www.npmjs.com/package/reconnecting-websocket
+// https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
+var rws_= undefined;
+
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
 
@@ -41,20 +45,21 @@ var cfg_= (function() {
 		get options() { return _options; },
 		set options(obj) {
 			_options= obj;
+		},
+		is_empty: function () {
+			// https://bobbyhadz.com/blog/javascript-check-if-object-is-empty
+			return Object.keys(_options).length === 0;
 		}
     }
 })();
-
-// https://www.npmjs.com/package/reconnecting-websocket
-// https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
-let rws = new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
-// console.log('REFL: rws:', rws);
 
 //-------------------------------------------------------------------------------------------------
 // bc -> ws
 
 function handler_(msg)
 {
+	"use strict";
+
 	if (msg === undefined)
 		return;
 
@@ -69,8 +74,8 @@ function handler_(msg)
 	msg_cache_.cache(str_msg, new EntryContext(knr_MSG_EXPIRATION_ms));
 
 	if (cfg_.logr&RDR) console.log('REFL-ws: send: bc -> ws -- ', str_msg);
-	if (rws && (rws.readyState === WebSocket.OPEN))
-		rws.send(str_msg);
+	if (rws_ && (rws_.readyState === WebSocket.OPEN))
+		rws_.send(str_msg);
 }
 
 // TODO: the config options are set are global are init'd, so this never outputs debug info
@@ -79,16 +84,16 @@ IPSME_MsgEnv.subscribe(handler_);
 //-------------------------------------------------------------------------------------------------
 // bc <- ws
 
-rws.onopen = function (event) {
+function ws_handler_open_ (event) {
 	if (cfg_.logr&CXN) console.log('REFL-ws: open: ', event);
-	port.postMessage({ sharedworker : 'INITd!' });
+	port_.postMessage({ sharedworker : 'INITd!' });
 }
 
-rws.onclose = function (event) {
+function ws_handler_close_ (event) {
 	if (cfg_.logr&CXN) console.log('REFL-ws: close: ', event);
 }
 
-rws.onmessage = function (event) 
+function ws_handler_onmessage_ (event) 
 {
 	if (event.data === undefined)
 		return;
@@ -106,45 +111,62 @@ rws.onmessage = function (event)
 	IPSME_MsgEnv.publish(str_msg);
 }
 
-rws.onerror = function (event) {
+function ws_handler_onerror_ (event) {
 	if (cfg_.logr&CXN) console.log('REFL-ws: err: ', event);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-var port;
-var connections= [];
+var port_;
+var connections_= [];
 
 onconnect = function (e) {
-	port = e.ports[0];
+	port_ = e.ports[0];
 
 	// console.log('REFL: onconnect: ', e);
 
-	if (rws && (rws.readyState === WebSocket.OPEN))
-		port.postMessage({ sharedworker : 'INITd!' });
+	// if (rws_ && (rws_.readyState === WebSocket.OPEN))
+	// 	port_.postMessage({ sharedworker : 'INITd!' });
 
 	// https://www.codemag.com/Article/2101071/Understanding-and-Using-Web-Workers
-    const existingConnection= connections.find(connection => {
-        return connection === port;
+    const existingConnection= connections_.find(connection => {
+        return connection === port_;
     });
     if (existingConnection === undefined || existingConnection == null)
-        connections.push(port);	
+        connections_.push(port_);	
+
 	// ----
 
-	port.onmessage= function (e) {
+	port_.onmessage= function (e) {
+		"use strict";		
 		// port.postMessage(workerResult);
-
-		cfg_.options= e.data;
 
 		if (cfg_.logr&CXN) console.log('REFL: port.onmessage: options: ', cfg_.options);
 			
+		if (rws_) {
+			// We are here when another page also loads the sharedworker
+			// prevent cfg_.options from possibly being clobbered by a second instance
+			
+			if (rws_.readyState === WebSocket.OPEN)
+				port_.postMessage({ sharedworker : 'INITd!' });
+
+			return;
+		}
+
+		cfg_.options= e.data;
+
 		IPSME_MsgEnv.config= {
 			prefix : 'REFL-ws: ',
 			logr : (cfg_.logr&MSG) ? (cfg_.logr&CXN) | (cfg_.logr&RDR) : 0,
 		}
 
-		rws.close();
-		rws = new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
+		rws_= new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
+		rws_.onopen= ws_handler_open_;
+		rws_.onclose= ws_handler_close_;
+		rws_.onmessage= ws_handler_onmessage_;
+		rws_.onerror= ws_handler_onerror_;
+
+		if (cfg_.logr&CXN) console.log('REFL: rws:', rws_);
 	};
 };
 

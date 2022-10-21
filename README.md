@@ -30,4 +30,6 @@ reflector_ws_client.config.options=  {
 	},
 	logr : b_
 }
+
+reflector_ws_client.load(...) {}
 ```

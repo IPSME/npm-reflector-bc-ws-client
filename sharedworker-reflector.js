@@ -1,5 +1,6 @@
 
-
+const CXN= 0b1 << 0;	// connections
+		
 var cfg_= (function() {
     let _options= {};
 
@@ -18,8 +19,6 @@ function load(window, str_worker_path, callback_INITd)
 {
 	if (!!window.SharedWorker) 
 	{
-		const CXN= 0b1 << 0;	// connections
-		
 		const sharedworker= new SharedWorker( str_worker_path ); // "./reflector-bc-ws-client.js"
 		sharedworker.port.start();
 		sharedworker.port.postMessage(cfg_.options);
