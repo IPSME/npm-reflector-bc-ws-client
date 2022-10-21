@@ -10,11 +10,11 @@ import * as reflector_ws_client from '@ipsme/reflector-ws-client';
 // -- OR --
 // import * as reflector_ws_client from 'https://unpkg.com/@ipsme/reflector-ws-client@X.X.X';
 
-// the SharedWorker reflector reflector-bc-ws-client.js must be moved from node_modules
+// the SharedWorker reflector reflector-bc-ws-client.js must be copied from node_modules
 // https://unpkg.com/browse/@ipsme/reflector-ws-client@X.X.X/
-// below it has been copied via WebPack to './public'
+// in this example it has been copied (via WebPack) to './public'
 reflector_ws_client.load(window, "./public/reflector-bc-ws-client.js",  function () {
-	// ...
+	// run init code ...
 });
 ```
 
@@ -28,7 +28,7 @@ reflector_ws_client.config.options=  {
 		maxRetries: 20,
 		// debug: true
 	},
-	logr : b_
+	logr : 0
 }
 
 reflector_ws_client.load(...) {}
