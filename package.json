@@ -1,8 +1,8 @@
 {
   "name": "@ipsme/reflector-ws-client",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "",
-  "main": "sharedworker-reflector.js",
+  "main": "dist/sharedworker-reflector.es.js",
   "scripts": {
     "build": "webpack",
     "test": "test.js",
@@ -30,6 +30,7 @@
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
     "del-cli": "^5.0.0",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
