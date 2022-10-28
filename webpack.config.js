@@ -12,8 +12,8 @@ module.exports = {
 		// https://stackoverflow.com/questions/55420795/copy-files-from-node-modules-to-dist-dir
 		new CopyWebpackPlugin({
 			patterns: [{
-				from: 'src/sharedworker-reflector.js',
-				to: 'sharedworker-reflector.es.js'
+				from: 'src/sharedworker-reflector.mjs',
+				to: 'sharedworker-reflector.es.mjs'
 			}]
 		})
 	]
