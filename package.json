@@ -25,8 +25,9 @@
   },
   "homepage": "https://github.com/IPSME/npm-reflector-ws-client#readme",
   "dependencies": {
-    "@ipsme/msgcache-dedup": "^0.0.6",
-    "@ipsme/msgenv-broadcastchannel": "^0.2.6",
+    "@ipsme/msgcache-dedup": "^0.1.16",
+    "@ipsme/msgenv-broadcastchannel": "^0.3.2",
+    "@knev/bitlogr": "^0.2.2",
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {

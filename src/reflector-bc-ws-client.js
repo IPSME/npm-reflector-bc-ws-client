@@ -1,6 +1,7 @@
 
+import { BitLogr, l_LL } from '@knev/bitlogr';
 import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel';
-import { MsgCache, EntryContext } from '@ipsme/msgcache-dedup';
+import { MsgCache, MsgContext, l as msgcache_l } from '@ipsme/msgcache-dedup';
 import ReconnectingWebSocket from 'reconnecting-websocket';
 
 //-------------------------------------------------------------------------------------------------
@@ -12,25 +13,29 @@ var rws_= undefined;
 let msg_cache_= new MsgCache();
 const knr_MSG_EXPIRATION_ms= 4000;
 
-// TODO: https://emergent.systems/posts/bit-fields/
-const CXN= 0b1 << 0;	// connections
-const RDR= 0b1 << 1;	// redirect
-const DUP= 0b1 << 2;	// duplicates
-const MSG= 0b1 << 3;	// MsgEnv
+let LOGR_= new BitLogr();
+
+const l_ = {
+	// Reflector_IPC_main : 0b1 << 0,
+	DUPS				: 0b1 << 1,	// duplicates
+	... l_LL(IPSME_MsgEnv.l, 4),
+	... l_LL(msgcache_l, 8),
+}
+LOGR_.labels= l_;
 
 const str_default_ws_url_= 'ws://localhost:8082';
 
-// const reflector_options= {
-// 	url : "ws://localhost:8082",
-// 	rws : {
-// 		maxRetries: 20,
-// 		debug: true
-// 	},
-// 	log : cfg_.logr
-// }
-
 var cfg_= (function() {
     let _options= {};
+
+	// const reflector_options= {
+	// 	url : "ws://localhost:8082",
+	// 	rws : {
+	// 		maxRetries: 20,
+	// 		debug: true
+	// 	},
+	// 	log : cfg_.logr
+	// }
 
     return {
 		get url() {
@@ -71,9 +76,9 @@ function handler_(msg)
 
 	let str_msg= msg;
 
-	msg_cache_.cache(str_msg, new EntryContext(knr_MSG_EXPIRATION_ms));
+	msg_cache_.cache(str_msg, new MsgContext(knr_MSG_EXPIRATION_ms));
 
-	if (cfg_.logr&RDR) console.log('REFL-ws: send: bc -> ws -- ', str_msg);
+	LOGR_.log(l_.REFL, 'REFL-ws: send: bc -> ws -- ', str_msg);
 	if (rws_ && (rws_.readyState === WebSocket.OPEN))
 		rws_.send(str_msg);
 }
@@ -85,12 +90,12 @@ IPSME_MsgEnv.subscribe(handler_);
 // bc <- ws
 
 function ws_handler_open_ (event) {
-	if (cfg_.logr&CXN) console.log('REFL-ws: open: ', event);
+	LOGR_.log(l_.CXNS, 'REFL-ws: open: ', event);
 	port_.postMessage({ sharedworker : 'INITd!' });
 }
 
 function ws_handler_close_ (event) {
-	if (cfg_.logr&CXN) console.log('REFL-ws: close: ', event);
+	LOGR_.log(l_.CXNS, 'REFL-ws: close: ', event);
 }
 
 function ws_handler_onmessage_ (event) 
@@ -103,16 +108,16 @@ function ws_handler_onmessage_ (event)
 
 	let [ b_res, ctx ]= msg_cache_.contains(str_msg)
 	if (b_res) {
-		if (cfg_.logr&DUP) console.log('REFL-ws: *DUP | <- ws -- ', str_msg); 
+		LOGR_.log(l_.DUPS, 'REFL-ws: *DUP | <- ws -- ', str_msg); 
 		return;
 	}
 
-	if (cfg_.logr&RDR) console.log('REFL-ws: publish: bc <- ws -- ', str_msg);
+	LOGR_.log(l_.REFL, 'REFL-ws: publish: bc <- ws -- ', str_msg);
 	IPSME_MsgEnv.publish(str_msg);
 }
 
 function ws_handler_onerror_ (event) {
-	if (cfg_.logr&CXN) console.log('REFL-ws: err: ', event);
+	LOGR_.log(l_.CXNS, 'REFL-ws: err: ', event);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -141,7 +146,7 @@ onconnect = function (e) {
 		"use strict";		
 		// port.postMessage(workerResult);
 
-		if (cfg_.logr&CXN) console.log('REFL: port.onmessage: options: ', cfg_.options);
+		LOGR_.log(l_.CXNS, 'REFL: port.onmessage: options: ', cfg_.options);
 			
 		if (rws_) {
 			// We are here when another page also loads the sharedworker
@@ -155,9 +160,9 @@ onconnect = function (e) {
 
 		cfg_.options= e.data;
 
-		IPSME_MsgEnv.config= {
+		IPSME_MsgEnv.config.options= {
 			prefix : 'REFL-ws: ',
-			logr : (cfg_.logr&MSG) ? (cfg_.logr&CXN) | (cfg_.logr&RDR) : 0,
+			logr : cfg_.options.logr
 		}
 
 		rws_= new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
@@ -166,7 +171,7 @@ onconnect = function (e) {
 		rws_.onmessage= ws_handler_onmessage_;
 		rws_.onerror= ws_handler_onerror_;
 
-		if (cfg_.logr&CXN) console.log('REFL: rws:', rws_);
+		LOGR_.log(l_.CXNS, 'REFL: rws:', rws_);
 	};
 };
 
