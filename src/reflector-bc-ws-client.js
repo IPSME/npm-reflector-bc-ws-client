@@ -10,7 +10,7 @@ import ReconnectingWebSocket from 'reconnecting-websocket';
 // https://unpkg.com/browse/reconnecting-websocket@4.4.0/dist/
 var rws_= undefined;
 
-let msg_cache_= new MsgCache();
+let msgcache_= undefined;
 const knr_MSG_EXPIRATION_ms= 4000;
 
 let LOGR_= new BitLogr();
@@ -76,7 +76,7 @@ function handler_(msg)
 
 	let str_msg= msg;
 
-	msg_cache_.cache(str_msg, new MsgContext(knr_MSG_EXPIRATION_ms));
+	msgcache_.cache(str_msg, new MsgContext(knr_MSG_EXPIRATION_ms));
 
 	LOGR_.log(l_.REFL, 'REFL-ws: send: bc -> ws -- ', str_msg);
 	if (rws_ && (rws_.readyState === WebSocket.OPEN))
@@ -106,7 +106,7 @@ function ws_handler_onmessage_ (event)
 	console.assert(typeof(event.data) === 'string', 'a msg coming from NSDNC must be a string');
 	const str_msg = event.data;
 
-	let [ b_res, ctx ]= msg_cache_.contains(str_msg)
+	let [ b_res, ctx ]= msgcache_.contains(str_msg)
 	if (b_res) {
 		LOGR_.log(l_.DUPS, 'REFL-ws: *DUP | <- ws -- ', str_msg); 
 		return;
@@ -164,6 +164,11 @@ onconnect = function (e) {
 			prefix : 'REFL-ws: ',
 			logr : cfg_.options.logr
 		}
+
+		MsgCache.config.options= cfg_.options;
+
+		if (! msgcache_)
+		msgcache_= new MsgCache();
 
 		rws_= new ReconnectingWebSocket(cfg_.url, [], cfg_.rws); // wss://
 		rws_.onopen= ws_handler_open_;
