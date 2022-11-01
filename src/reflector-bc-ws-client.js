@@ -1,8 +1,10 @@
 
-import { BitLogr, l_LL } from '@knev/bitlogr';
+import { BitLogr } from '@knev/bitlogr';
 import * as IPSME_MsgEnv from '@ipsme/msgenv-broadcastchannel';
-import { MsgCache, MsgContext, l as msgcache_l } from '@ipsme/msgcache-dedup';
+import { MsgCache, MsgContext } from '@ipsme/msgcache-dedup';
 import ReconnectingWebSocket from 'reconnecting-websocket';
+
+import { l_ } from './logr.labels.mjs';
 
 //-------------------------------------------------------------------------------------------------
 
@@ -14,13 +16,6 @@ let msgcache_= undefined;
 const knr_MSG_EXPIRATION_ms= 4000;
 
 let LOGR_= new BitLogr();
-
-const l_ = {
-	// Reflector_IPC_main : 0b1 << 0,
-	DUPS				: 0b1 << 1,	// duplicates
-	... l_LL(IPSME_MsgEnv.l, 4),
-	... l_LL(msgcache_l, 8),
-}
 LOGR_.labels= l_;
 
 const str_default_ws_url_= 'ws://localhost:8082';
