@@ -1,8 +1,8 @@
 {
   "name": "@ipsme/reflector-ws-client",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "",
-  "main": "dist/sharedworker-reflector.es.js",
+  "main": "dist/sharedworker-reflector.es.mjs",
   "scripts": {
     "build": "webpack",
     "test": "test.js",
