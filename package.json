@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/sharedworker-reflector.es.mjs",
   "scripts": {
-    "build": "webpack",
+    "build": "rollup --config",
     "test": "test.js",
     "clean": "del dist && echo OK"
   },
@@ -31,9 +31,8 @@
     "reconnecting-websocket": "^4.4.0"
   },
   "devDependencies": {
-    "copy-webpack-plugin": "^11.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
     "del-cli": "^5.0.0",
-    "webpack": "^5.74.0",
-    "webpack-cli": "^4.10.0"
+    "rollup": "^3.2.5"
   }
 }
