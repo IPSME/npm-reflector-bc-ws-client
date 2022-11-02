@@ -1088,7 +1088,7 @@ onconnect = function (e) {
 			logr : cfg_.options.logr
 		};
 
-		MsgCache.config.options= cfg_.options;
+		MsgCache.options= cfg_.options;
 
 		if (! msgcache_)
 		msgcache_= new MsgCache();
