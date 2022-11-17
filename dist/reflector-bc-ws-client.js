@@ -961,7 +961,7 @@ const knr_MSG_EXPIRATION_ms= 4000;
 let LOGR_= new BitLogr$2();
 LOGR_.labels= l_;
 
-const str_default_ws_url_= 'ws://localhost:8082';
+const str_default_ws_url_= 'ws://localhost:8023';
 
 var cfg_= (function() {
     let _options= {};

@@ -1,6 +1,6 @@
 {
   "name": "@ipsme/reflector-ws-client",
-  "version": "0.3.11",
+  "version": "0.4.0",
   "description": "",
   "main": "dist/sharedworker-reflector.es.mjs",
   "types": "dist/sharedworker-reflector.d.ts",
