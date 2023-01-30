@@ -1,4 +1,4 @@
-# npm-reflector-ws-client
+# npm-reflector-webbr-ws
 
 This library contains the code for a running an IPSME "reflector" client as a SharedWorker. Messages are reflected from the web messaging environment (ME), namely a BroadcastChannel, to a the IPSME reflector server via a WebSocket.
   
@@ -9,7 +9,7 @@ This library contains the code for a running an IPSME "reflector" client as a Sh
 
 In a browser environment, this reflector can be loaded via `unpkg.com`
 ```
-import * as sharedworker_reflector from 'https://unpkg.com/@ipsme/reflector-ws-client@X.X.X';
+import * as sharedworker_reflector from 'https://unpkg.com/@ipsme/reflector-webbr-ws@X.X.X';
 ```
 However! The SharedWorker itself (`dist/reflector-bc-ws-client.js` in the `node_modules` package) must be copied to a publicly accessible location, so that it can be loaded by `sharedworker_reflector.load(...)`.
 
