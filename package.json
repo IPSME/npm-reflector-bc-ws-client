@@ -1,6 +1,6 @@
 {
   "name": "@ipsme/reflector-webbr-ws",
-  "version": "0.4.0",
+  "version": "0.4.4",
   "description": "",
   "main": "dist/sharedworker-reflector.es.mjs",
   "types": "dist/sharedworker-reflector.d.ts",
